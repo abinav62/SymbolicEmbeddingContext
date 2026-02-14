@@ -21,7 +21,6 @@ The evaluation framework tests various approaches for providing relevant code co
    ```json
    {
      "EMBED_API_KEY": "your-embed-api-key",
-     "SYMBED_API_KEY": "your-symbed-api-key",
      "LLM_API_KEY": "your-llm-api-key"
    }
    ```

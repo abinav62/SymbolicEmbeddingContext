@@ -51,7 +51,7 @@ Create a `credentials.json` file with:
 ```json
 {
   "OPENAI_API_KEY": "your-azure-openai-key",
-  "METIS_API_KEY": "your-metis-api-key"
+  "EMBED_API_KEY": "your-EMBED-api-key"
 }
 ```
 
@@ -68,7 +68,7 @@ Create a `credentials.json` file with:
 cat > credentials.json << EOF
 {
   "OPENAI_API_KEY": "your-key",
-  "METIS_API_KEY": "your-key"
+  "EMBED_API_KEY": "your-key"
 }
 EOF
 

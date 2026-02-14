@@ -230,22 +230,7 @@ def retrieve_symbolic_chunks(target_java_code, chunks, chunk_dict, repo_root, re
                 if (chunk['file'], chunk['chunk_index']) not in chunk_id_set:
                     chunk_id_set.add((chunk['file'], chunk['chunk_index']))
                     relevant_chunks.append(chunk)
-                    # if len(chunk["chunk"]) < 100 or "\n" not in chunk['chunk'].strip():
-                    #     next_chunk_i = chunk['chunk_index']+1 if type(chunk['chunk_index'])==int else str(int(chunk['chunk_index'])+1)
-                    #     next_chunk_file = chunk['file']
-                    #     next_chunk = chunk_dict.get(next_chunk_file, {}).get(next_chunk_i, None)
-                    #     if next_chunk and (next_chunk_file, next_chunk_i) not in chunk_id_set:
-                    #         chunk_id_set.add((next_chunk_file, next_chunk_i))
-                    #         relevant_chunks.append({
-                    #             "file": next_chunk_file,
-                    #             "chunk_index": next_chunk_i,
-                    #             "chunk": next_chunk
-                    #         })
                     chunk_id_set.add((chunk["file"], chunk["chunk_index"]))
-                    # if len(candidate["chunk"]) < 100 or "\n" not in candidate['chunk'].strip():
-                    #     if chunk_dict[candidate["file"]].get(candidate["chunk_index"] + 1, {}) and (candidate["file"], candidate["chunk_index"] + 1) not in file_set:
-                    #         file_set.add((candidate["file"], candidate["chunk_index"] + 1))
-                    #         res.append(chunk_dict[candidate["file"]].get(candidate["chunk_index"] + 1, {}))
                     i = chunk["chunk_index"]
                     while len(chunk["chunk"]) < 1000 or "\n" not in chunk['chunk'].strip():
                         if chunk_dict[chunk["file"]].get(chunk["chunk_index"] + 1, {}) and (chunk["file"], chunk["chunk_index"] + 1) not in chunk_id_set:
@@ -367,10 +352,10 @@ def rerank_chunks(query, chunks, topk=0, timeout=600):
         topk = len(chunks)
     else:
         topk = min(topk, len(chunks))
-    url = "https://data-ai-dev.microsoft.com/metisapp/rerank/Qwen3-Reranker-4B"
+    url = ""
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {os.getenv('METIS_API_KEY')}"
+        "Authorization": f"Bearer {os.getenv('EMBED_API_KEY')}"
     }
 
     data = {
@@ -404,10 +389,10 @@ def embed_chunks(chunks, embedder=None):
             chunks[i]["embedding"] = emb
         return chunks
 
-    url = "https://data-ai-dev.microsoft.com/metisapp/embed/qwen3-embedding-4b"
+    url = ""
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {os.getenv('METIS_API_KEY')}"
+        "Authorization": f"Bearer {os.getenv('EMBED_API_KEY')}"
     }
     max_chunks = 256
     chunk_lists = []
@@ -439,10 +424,10 @@ def embed_chunks(chunks, embedder=None):
 def embed_query(query, embedder=None):
     if embedder:
         return embedder.embed_query(query)
-    url = "https://data-ai-dev.microsoft.com/metisapp/embed/qwen3-embedding-4b"
+    url = ""
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {os.getenv('METIS_API_KEY')}"
+        "Authorization": f"Bearer {os.getenv('EMBED_API_KEY')}"
     }
     data = {"input": query}
     response = requests.post(url, headers=headers, json=data)
@@ -467,9 +452,9 @@ if __name__ == "__main__":
         try:
             with open(credentials_path, "r") as f:
                 credentials = json.load(f)
-                if "METIS_API_KEY" in credentials:
-                    os.environ["METIS_API_KEY"] = credentials["METIS_API_KEY"]
-                    logging.info("METIS_API_KEY loaded from credentials.json")
+                if "EMBED_API_KEY" in credentials:
+                    os.environ["EMBED_API_KEY"] = credentials["EMBED_API_KEY"]
+                    logging.info("EMBED_API_KEY loaded from credentials.json")
         except Exception as e:
             logging.warning(f"Failed to load credentials.json: {e}")
     repo_path = "/home/azureuser/repoclassbench/temp/java/original_repo/"
@@ -496,25 +481,3 @@ if __name__ == "__main__":
             out_f.write(f"File: {chunk['file']}, Chunk Index: {chunk['chunk_index']}\n")
             out_f.write(chunk['chunk'])
             out_f.write("\n\n")    
-
-    # print("Method Calls and their defining chunks:")
-    # for method, chunk_ids in method_chunks.items():
-    #     print(f"Method: {method}, Defined in chunks: {chunk_ids}")
-    # print("\nClass Instantiations and their defining chunks:")
-    # for cls, chunk_ids in class_chunks.items():
-    #     print(f"Class: {cls}, Defined in chunks: {chunk_ids}")
-    # embedder = HuggingFaceEmbeddings(model_name="Qwen/Qwen3-Embedding-4B")
-    # cached_chunks = load_cached_embeddings(cache_path)
-    # if cached_chunks is not None:
-    #     chunks = cached_chunks
-    # else:
-    #     chunks = embed_chunks(chunks)
-    #     cache_embeddings(chunks, cache_path)
-    
-    
-    # # print(semantic_chunking([{"path": filepath, "content": query_code}]))
-    # # query = "The public class StringNumberHandler, which extends the abstract class AbstractCellHandler with a generic type of String, is specifically tailored to manage the conversion and formatting of numeric strings within Excel cells. ..."
-    # # print(symbolic_only_retrieval("The public class StringNumberHandler is a specialized class that extends the AbstractCellHandler class with a generic type of String. This class is designed to handle operations related to Excel cells that contain numeric data represented as strings. \n\nThe getCellValue method is overridden from the parent class and is responsible for retrieving the value of a cell in an Excel sheet. It takes three arguments: a SheetContext object, an ExcelFieldConfig object, and a CellResult object. The method first retrieves the numeric value from the CellResult object and converts it into a BigDecimal. It then retrieves the Java format for the Excel field configuration and uses this format to convert the BigDecimal into a string.\n\nThe setCellValue method is also overridden from the parent class and is responsible for setting the value of a cell in an Excel row. It takes four arguments: a RowContext object, an ExcelFieldConfig object, a Cell object, and a String value. The method converts the string value into a BigDecimal and then into a double value, which is set as the value of the cell.\n\nThe getExcelType method is overridden from the parent class and returns the ExcelType of the cell, which in this case is NUMERIC, indicating that the cell contains numeric data.\n\nThe getDefaultExcelFormat method is also overridden from the parent class and returns the default Excel format for the cell, which in this case is \"0.00\". This format indicates that the cell's numeric value should be displayed with two decimal places.\n\n", repo_path, filepath, topk=4))
-
-    # symbols = set(find_file_references_with_parser(filepath, "/home/azureuser/repoclassbench/temp/java/original_repo/zouzhiy-excel"))
-    # print(len(symbols))

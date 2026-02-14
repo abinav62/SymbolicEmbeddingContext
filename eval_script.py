@@ -24,13 +24,12 @@ credentials_path = os.path.join("/home/azureuser/credentials.json")
 with open(credentials_path, 'r') as f:
     credentials = json.load(f)
     embed_api_key = credentials.get("EMBED_API_KEY", "")
-    symbed_api_key = credentials.get("SYMBED_API_KEY", "")
     llm_api_key = credentials.get("LLM_API_KEY", "")
 
 settings = OpenHandsSettings(
     max_iterations=100,
     llm_model="azure/deepprompt-gpt-5-2025-08-07",
-    llm_base_url="",
+    llm_base_url="", # Insert your own here
     llm_api_key=llm_api_key,
     num_workers=3,
     openhands_path="/home/azureuser",
@@ -80,25 +79,6 @@ semantic_nlq_evaluator = SemanticJavaEvaluator(
 
 result_semantic_nlq = semantic_nlq_evaluator.evaluate(output_name=f"semantic_nlq_default_trajectories")
 print(result_semantic_nlq)
-
-symbed_evaluator = SemanticJavaEvaluator(
-    root_path="/home/azureuser/context_retrieval_evals",
-    repo_path="repoclassbench/temp",
-    dataset_path="repoclassbench/datasets",
-    outputs_path=outputs_path,
-    embedding_cache_path="embedding_cache_symbed_filtered_v03",
-    embed_url="",
-    nlq=True,
-    context_path=f"context/java/symbed_filtered_v03/10",
-    embed_api_key=symbed_api_key,
-    rerank_api_key=embed_api_key,
-    embed_top_k=10,
-    rerank_top_k=0,
-    settings=settings
-)
-
-result_symbed = symbed_evaluator.evaluate(output_name=f"symbed_filtered_v03_10_trajectories")
-print(result_symbed)
 
 symbolic_evaluator = SymbolicJavaEvaluator(
     root_path="/home/azureuser/context_retrieval_evals",
